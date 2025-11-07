@@ -1,7 +1,8 @@
 import pandas as pd
 from prophet import Prophet
 from prophet.plot import plot_plotly
-
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+import numpy as np
 
 def load_data(path):
     data = pd.read_csv(path)
@@ -29,10 +30,19 @@ def main():
 
     forecast = model.predict(future)
 
-    print(forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']])
+    forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].to_csv("forecast_tableau.csv", index=False)
 
     fig = plot_plotly(model, forecast)
     fig.show()
+
+    test = df[-3:]
+    y_true = test['y'].values
+    y_pred = forecast['yhat'][-3:].values
+
+    mae = mean_absolute_error(y_true, y_pred)
+    rmse = np.sqrt(mean_squared_error(y_true, y_pred))
+
+    print(f"MAE: {mae:.2f}, RMSE: {rmse:.2f}")
 
 
 if __name__ == "__main__":
